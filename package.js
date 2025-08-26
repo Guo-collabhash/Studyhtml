@@ -1,3 +1,7 @@
+"dependencies": {
+  "pg": "^8.11.3",
+  "dotenv": "^16.3.1"
+}
 {
   "name": "pomodoro-vercel",
   "type": "module",
@@ -5,4 +9,5 @@
     "pg": "^8.11.3",
     "dotenv": "^16.3.1"
   }
+
 }

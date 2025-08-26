@@ -2045,19 +2045,24 @@
             let filteredReviews = [...reviews];
             
             if (currentReviewFilter === 'upcoming') {
-                const now = new Date();
+                // 获取今天0点0分0秒（作为今天的开始）
+                const todayStart = new Date();
+                todayStart.setHours(0, 0, 0, 0);
+
+                // 计算1个月后的时间点
                 const oneMonthLater = new Date();
                 oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
-                
+
+                // 筛选条件：今天0点至1个月后之间的所有记录
                 filteredReviews = filteredReviews.filter(review => {
                     const reviewDate = new Date(review.reviewDate);
-                    return reviewDate >= now && reviewDate <= oneMonthLater;
+                    return reviewDate >= todayStart && reviewDate <= oneMonthLater;
                 });
-                
-                // 按日期排序
+
+                // 按日期排序（从早到晚）
                 filteredReviews.sort((a, b) => new Date(a.reviewDate) - new Date(b.reviewDate));
-                
-                reviewRangeTitle.textContent = '即将到来的复习';
+
+                reviewRangeTitle.textContent = '今天至一个月后';
                 reviewRangeTitle.classList.remove('hidden');
             } else if (currentReviewFilter === 'all') {
                 reviewDateRangeFilter.classList.remove('hidden');
@@ -2210,18 +2215,24 @@
             const reviewElement = document.createElement('div');
             const reviewDate = new Date(review.reviewDate);
             const now = new Date();
-            
+         
+            // 仅比较日期部分，忽略时间
+            const reviewDateOnly = new Date(reviewDate.getFullYear(), reviewDate.getMonth(), reviewDate.getDate());
+            const nowDateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             // 确定复习状态样式
             let statusClass = '';
             let statusText = '';
-            
+
             if (review.completed) {
                 statusClass = 'bg-secondary/10 text-secondary border-secondary';
                 statusText = '已完成';
-            } else if (reviewDate < now) {
+                // 已完成状态
+            } else if (reviewDateOnly < nowDateOnly) {
+                // 日期已过期（前一天及之前）
                 statusClass = 'bg-warning/10 text-warning border-warning';
                 statusText = '已逾期';
             } else {
+                // 今天或未来
                 statusClass = 'bg-primary/10 text-primary border-primary';
                 statusText = '待复习';
             }

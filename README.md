@@ -1,0 +1,2 @@
+# kimi666
+fqclock

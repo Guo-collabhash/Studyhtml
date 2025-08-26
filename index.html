@@ -2215,42 +2215,54 @@
             const reviewElement = document.createElement('div');
             const reviewDate = new Date(review.reviewDate);
             const now = new Date();
-         
-            // 仅比较日期部分，忽略时间
+
+            // 获取任务完成日期
+            const task = tasks.find(t => t.id === review.taskId);
+            const taskCompletedAt = new Date(task.completedAt);
+
+            // 计算这是第几次复习
+            const allReviewsForTask = reviews.filter(r => r.taskId === review.taskId).sort((a, b) => a.daysLater - b.daysLater);
+            const reviewIndex = allReviewsForTask.findIndex(r => r.id === review.id) + 1;
+
+            // 状态样式
             const reviewDateOnly = new Date(reviewDate.getFullYear(), reviewDate.getMonth(), reviewDate.getDate());
             const nowDateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            // 确定复习状态样式
+
             let statusClass = '';
             let statusText = '';
 
             if (review.completed) {
                 statusClass = 'bg-secondary/10 text-secondary border-secondary';
                 statusText = '已完成';
-                // 已完成状态
             } else if (reviewDateOnly < nowDateOnly) {
-                // 日期已过期（前一天及之前）
                 statusClass = 'bg-warning/10 text-warning border-warning';
                 statusText = '已逾期';
             } else {
-                // 今天或未来
                 statusClass = 'bg-primary/10 text-primary border-primary';
                 statusText = '待复习';
             }
-            
+
             reviewElement.className = `task-item ${statusClass}`;
             reviewElement.dataset.id = review.id;
-            
+
             reviewElement.innerHTML = `
-                <div class="flex justify-between items-start mb-1">
-                    <h3 class="font-medium">${escapeHtml(review.taskName)}</h3>
-                    <span class="badge">${statusText}</span>
-                </div>
-                <div class="text-sm text-gray-500 mb-1">
-                    ${formatDate(reviewDate)} ${reviewDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </div>
-                ${review.taskNotes ? `<div class="review-note">${escapeHtml(review.taskNotes)}</div>` : ''}
-            `;
-            
+        <div class="flex justify-between items-start mb-1">
+            <h3 class="font-medium">${escapeHtml(review.taskName)}</h3>
+            <span class="badge">${statusText}</span>
+        </div>
+        <div class="text-sm text-gray-500 mb-1">
+            完成日期：${formatDate(taskCompletedAt)}
+        </div>
+        
+        <div class="text-sm text-gray-500 mb-1">
+            复习日期：${formatDate(reviewDate)} 
+        </div>
+        <div class="text-sm text-gray-500 mb-1">
+            第 ${reviewIndex} 次复习（+${review.daysLater} 天）
+        </div>
+        ${review.taskNotes ? `<div class="review-note">${escapeHtml(review.taskNotes)}</div>` : ''}
+    `;
+
             // 单击显示/隐藏备注
             reviewElement.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -2259,7 +2271,7 @@
                     noteElement.classList.toggle('visible');
                 }
             });
-            
+
             // 双击标记完成/未完成
             reviewElement.addEventListener('dblclick', (e) => {
                 e.stopPropagation();
@@ -2271,7 +2283,7 @@
                     showNotification(reviews[reviewIndex].completed ? '已标记为完成' : '已标记为未完成');
                 }
             });
-            
+
             return reviewElement;
         }
         

@@ -1299,9 +1299,13 @@
         // 恢复计时器
         function resumeTimer() {
             mainTimer = setInterval(updateMainTimer, 1000);
-            if (enableBreakReminderCheckbox.checked && !breakReminderModal.classList.contains('hidden')) {
+
+            // ✅ 正确恢复休息提醒计时器
+            if (enableBreakReminderCheckbox.checked) {
+                clearInterval(breakTimer); // 防止重复
                 breakTimer = setInterval(checkBreakTime, 1000);
             }
+
             statusDisplay.textContent = '专注中...';
             pauseBtn.innerHTML = '<i class="fa fa-pause mr-2"></i>暂停';
             pauseBtn.removeEventListener('click', resumeTimer);
